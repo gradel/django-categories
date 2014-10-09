@@ -1,3 +1,4 @@
+from django import VERSION
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.encoding import force_unicode
@@ -106,14 +107,14 @@ class CategoryRelationManager(models.Manager):
         """
         Get all the items of the given content type related to this item.
         """
-        qs = self.get_query_set()
+        qs = self.get_queryset() if VERSION > (1, 6) else self.get_query_set()
         return qs.filter(content_type__name=content_type)
 
     def get_relation_type(self, relation_type):
         """
         Get all the items of the given relationship type related to this item.
         """
-        qs = self.get_query_set()
+        qs = self.get_queryset() if VERSION > (1, 6) else self.get_query_set()
         return qs.filter(relation_type=relation_type)
 
 
@@ -138,7 +139,7 @@ class CategoryRelation(models.Model):
 try:
     from south.db import db  # South is required for migrating. Need to check for it
     from django.db.models.signals import post_syncdb
-    from categories.migration import migrate_app
+    from categories.south_migrations.migrate import migrate_app
     post_syncdb.connect(migrate_app)
 except ImportError:
     pass
